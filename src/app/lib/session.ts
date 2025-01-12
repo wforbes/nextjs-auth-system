@@ -16,9 +16,12 @@ export async function createSession(userId: string) {
 	(await cookies()).set("session", session, {
 		httpOnly: true,
 		secure: true,
-		sameSite: "strict",
-		maxAge: 7 * 24 * 60 * 60,
+		expires: expiresAt,
 	});
+}
+
+export async function deleteSession() {
+	(await cookies()).delete("session");
 }
 
 export async function encrypt(payload: SessionPayload) {
@@ -34,7 +37,7 @@ export async function decrypt(session: string | undefined = "") {
 		const { payload } = await jwtVerify(session, encodedKey, {
 			algorithms: ["HS256"],
 		});
-		return payload as SessionPayload;
+		return payload;
 	} catch (error) {
 		// todo: log error in db or sentry
 		console.error("failed to verify session", error);
